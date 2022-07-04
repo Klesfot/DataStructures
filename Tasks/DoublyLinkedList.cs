@@ -22,6 +22,7 @@ namespace Tasks
 
                 var len = 1;
                 var current = _rootNode;
+
                 while (current.Next != null)
                 {
                     len++;
@@ -44,6 +45,7 @@ namespace Tasks
             {
                 current = current.Next;
             }
+
             current.Next = new Node(e, Length);
             current.Next.Prev = current;
         }
@@ -56,14 +58,13 @@ namespace Tasks
                 return;
             }
 
-            var newNode = new Node(e, index);
             var current = _rootNode;
-
             while (current.Next != null && current.Index < index)
             {
                 current = current.Next;
             }
 
+            var newNode = new Node(e, index);
             if (current.Prev == null)
             {
                 _rootNode = newNode;
@@ -89,12 +90,10 @@ namespace Tasks
             }
 
             var current = _rootNode;
-
             while (current.Index < index && current.Next != null)
             {
                 current = current.Next;
             }
-
             return current.Data;
         }
 
@@ -116,22 +115,23 @@ namespace Tasks
                 return;
             }
 
-            if (current.Prev == null)
+            if (current.Prev == null && current.Next != null)
             {
                 current.Next.Prev = null;
                 _rootNode = current.Next;
                 DecrementIndicesRight(_rootNode);
-                return;
             }
 
-            if (current.Next == null)
+            if (current.Next != null && current.Prev != null)
+            {
+                current.Next.Prev = current.Prev;
+                current.Prev.Next = current.Next;
+            }
+
+            if (current.Next == null && current.Prev != null)
             {
                 current.Prev.Next = current.Next;
-                return;
             }
-
-            current.Next.Prev = current.Prev;
-            current.Prev.Next = current.Next;
         }
 
         public T RemoveAt(int index)
@@ -142,6 +142,7 @@ namespace Tasks
             }
 
             var current = _rootNode;
+
             while (current.Index < index)
             {
                 current = current.Next;
@@ -152,22 +153,24 @@ namespace Tasks
                 return default;
             }
 
-            if (current.Prev == null)
+            if (current.Prev == null && current.Next != null)
             {
                 current.Next.Prev = current.Prev;
                 _rootNode = current.Next;
                 DecrementIndicesRight(_rootNode);
-                return current.Data;
             }
 
-            if (current.Next == null)
+            if (current.Prev != null && current.Next != null)
             {
                 current.Prev.Next = current.Next;
-                return current.Data;
+                current.Next.Prev = current.Prev;
             }
 
-            current.Prev.Next = current.Next;
-            current.Next.Prev = current.Prev;
+            if (current.Prev != null && current.Next == null)
+            {
+                current.Prev.Next = current.Next;
+            }
+
             return current.Data;
         }
 
@@ -181,6 +184,7 @@ namespace Tasks
             }
 
             var current = node.Next;
+            
             while (current.Next != null)
             {
                 current.Index++;
@@ -198,6 +202,7 @@ namespace Tasks
             }
 
             var current = node.Next;
+            
             while (current.Next != null)
             {
                 current.Index--;
