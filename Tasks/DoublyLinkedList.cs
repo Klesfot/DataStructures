@@ -5,7 +5,7 @@ using Tasks.DoNotChange;
 
 namespace Tasks
 {
-    public class DoublyLinkedList<T> : IDoublyLinkedList<T> //TODO remove indices & rethink how they should operate
+    public class DoublyLinkedList<T> : IDoublyLinkedList<T>
     {
         private Node _rootNode;
 
@@ -18,7 +18,7 @@ namespace Tasks
                     return 0;
                 }
 
-                var len = 1; // some weird shit going on here
+                var len = 1;
                 var current = _rootNode;
                 while (current.next != null)
                 {
@@ -76,15 +76,15 @@ namespace Tasks
                 newNode.prev = current.prev;
                 newNode.prev.next = newNode;
                 current.prev = newNode;
-                current.index++;
+                IncrementIndicesRight(current);
                 return;
             }
             
             _rootNode = newNode;
             newNode.next = current;
-            newNode.prev = current.prev;
+            newNode.prev = null;
             current.prev = newNode;
-            current.index++;
+            IncrementIndicesRight(current);
         }
 
         public T ElementAt(int index)
@@ -117,7 +117,7 @@ namespace Tasks
                 {
                     current.next.prev = current.prev;
                     _rootNode = current.next;
-                    _rootNode.index--;
+                    DecrementIndicesRight(_rootNode);
                     return;
                 }
 
@@ -152,7 +152,7 @@ namespace Tasks
                 {
                     current.next.prev = current.prev;
                     _rootNode = current.next;
-                    _rootNode.index--;
+                    DecrementIndicesRight(_rootNode);
                     return current.data;
                 }
 
@@ -172,6 +172,40 @@ namespace Tasks
             }
 
             return default;
+        }
+
+        private void IncrementIndicesRight(Node node)
+        {
+            node.index++;
+
+            if (node.next == null)
+            {
+                return;
+            }
+
+            var current = node.next;
+            while (current.next != null)
+            {
+                current.index++;
+                current = current.next;
+            }
+        }
+
+        private void DecrementIndicesRight(Node node)
+        {
+            node.index--;
+
+            if (node.next == null)
+            {
+                return;
+            }
+
+            var current = node.next;
+            while (current.next != null)
+            {
+                current.index--;
+                current = current.next;
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
