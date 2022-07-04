@@ -9,6 +9,8 @@ namespace Tasks
     {
         private Node _rootNode;
 
+        public int TopIndex => Length - 1;
+
         public int Length
         {
             get
