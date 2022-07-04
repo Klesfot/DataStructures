@@ -20,10 +20,10 @@ namespace Tasks
 
                 var len = 1;
                 var current = _rootNode;
-                while (current.next != null)
+                while (current.Next != null)
                 {
                     len++;
-                    current = current.next;
+                    current = current.Next;
                 }
                 return len;
             }
@@ -37,13 +37,13 @@ namespace Tasks
                 return;
             }
 
-            Node current = _rootNode;
-            while (current.next != null)
+            var current = _rootNode;
+            while (current.Next != null)
             {
-                current = current.next;
+                current = current.Next;
             }
-            current.next = new Node(e, Length);
-            current.next.prev = current;
+            current.Next = new Node(e, Length);
+            current.Next.Prev = current;
         }
 
         public void AddAt(int index, T e)
@@ -54,36 +54,28 @@ namespace Tasks
                 return;
             }
 
-            Node current = _rootNode;
-            while (current.next != null && current.index < index)
-            {
-                current = current.next;
-            }
-
-            if (current.index == Length)
-            {
-                current.next = new Node(current.data, Length);
-                current.next.prev = current;
-                current.data = e;
-                return;
-            }
-
             var newNode = new Node(e, index);
+            var current = _rootNode;
 
-            if (current.prev != null)
+            while (current.Next != null && current.Index < index)
             {
-                newNode.next = current;
-                newNode.prev = current.prev;
-                newNode.prev.next = newNode;
-                current.prev = newNode;
+                current = current.Next;
+            }
+
+            if (current.Prev == null)
+            {
+                _rootNode = newNode;
+                newNode.Next = current;
+                newNode.Prev = null;
+                current.Prev = newNode;
                 IncrementIndicesRight(current);
                 return;
             }
-            
-            _rootNode = newNode;
-            newNode.next = current;
-            newNode.prev = null;
-            current.prev = newNode;
+
+            newNode.Next = current;
+            newNode.Prev = current.Prev;
+            newNode.Prev.Next = newNode;
+            current.Prev = newNode;
             IncrementIndicesRight(current);
         }
 
@@ -94,13 +86,14 @@ namespace Tasks
                 throw new IndexOutOfRangeException();
             }
 
-            Node current = _rootNode;
-            while (current.index < index && current.next != null)
+            var current = _rootNode;
+
+            while (current.Index < index && current.Next != null)
             {
-                current = current.next;
+                current = current.Next;
             }
 
-            return current.data;
+            return current.Data;
         }
 
         public IEnumerator<T> GetEnumerator()
@@ -110,32 +103,33 @@ namespace Tasks
 
         public void Remove(T item)
         {
-            Node current = _rootNode;
-            do
+            var current = _rootNode;
+            while (current.Next != null && !current.Data.Equals(item))
             {
-                if (current.data.Equals(item) && current.prev == null)
-                {
-                    current.next.prev = current.prev;
-                    _rootNode = current.next;
-                    DecrementIndicesRight(_rootNode);
-                    return;
-                }
+                current = current.Next;
+            }
 
-                if (current.data.Equals(item) && current.next == null)
-                {
-                    current.prev.next = current.next;
-                    return;
-                }
+            if (!current.Data.Equals(item))
+            {
+                return;
+            }
 
-                if (current.data.Equals(item) && current.next != null && current.prev == null)
-                {
-                    current.next.prev = current.prev;
-                    current.prev.next = current.next;
-                    return;
-                }
+            if (current.Prev == null)
+            {
+                current.Next.Prev = null;
+                _rootNode = current.Next;
+                DecrementIndicesRight(_rootNode);
+                return;
+            }
 
-                current = current.next;
-            } while (current != null);
+            if (current.Next == null)
+            {
+                current.Prev.Next = current.Next;
+                return;
+            }
+
+            current.Next.Prev = current.Prev;
+            current.Prev.Next = current.Next;
         }
 
         public T RemoveAt(int index)
@@ -145,66 +139,67 @@ namespace Tasks
                 throw new IndexOutOfRangeException();
             }
 
-            Node current = _rootNode;
-            while (current.index <= index)
+            var current = _rootNode;
+            while (current.Index < index)
             {
-                if (current.index == index && current.prev == null)
-                {
-                    current.next.prev = current.prev;
-                    _rootNode = current.next;
-                    DecrementIndicesRight(_rootNode);
-                    return current.data;
-                }
-
-                if (current.index == index && current.next == null)
-                {
-                    current.prev.next = current.next;
-                    return current.data;
-                }
-
-                if (current.index == index)
-                {
-                    current.prev.next = current.next;
-                    current.next.prev = current.prev;
-                    return current.data;
-                }
-                current = current.next;
+                current = current.Next;
             }
 
-            return default;
+            if (current.Index != index)
+            {
+                return default;
+            }
+
+            if (current.Prev == null)
+            {
+                current.Next.Prev = current.Prev;
+                _rootNode = current.Next;
+                DecrementIndicesRight(_rootNode);
+                return current.Data;
+            }
+
+            if (current.Next == null)
+            {
+                current.Prev.Next = current.Next;
+                return current.Data;
+            }
+
+            current.Prev.Next = current.Next;
+            current.Next.Prev = current.Prev;
+            return current.Data;
         }
 
         private void IncrementIndicesRight(Node node)
         {
-            node.index++;
+            node.Index++;
 
-            if (node.next == null)
+            if (node.Next == null)
             {
                 return;
             }
 
-            var current = node.next;
-            while (current.next != null)
+            var current = node.Next;
+            while (current.Next != null)
             {
-                current.index++;
-                current = current.next;
+                current.Index++;
+                current = current.Next;
             }
         }
 
         private void DecrementIndicesRight(Node node)
         {
-            node.index--;
+            node.Index--;
 
-            if (node.next == null)
+            if (node.Next == null)
             {
                 return;
             }
 
-            var current = node.next;
-            while (current.next != null)
+            var current = node.Next;
+            while (current.Next != null)
             {
-                current.index--;
-                current = current.next;
+                current.Index--;
+                current = current.Next;
             }
         }
 
@@ -215,15 +210,15 @@ namespace Tasks
 
         public class Node
         {
-            public T data;
-            public Node prev;
-            public Node next;
-            public int index;
+            public T Data;
+            public Node Prev;
+            public Node Next;
+            public int Index;
 
             public Node(T value, int index)
             {
-                data = value;
-                this.index = index;
+                Data = value;
+                Index = index;
             }
         }
     }
